@@ -127,3 +127,41 @@ def cek_per_kelompok(nomor_kelompok: int):
         "total_anak_yang_ngumpul": len(hasil_filter),
         "daftar_mahasiswa": hasil_filter
     }
+
+# =========================================================================
+# 6. Menu Hapus Tugas (Fitur khusus panitia)
+# =========================================================================
+@app.delete("/hapus-tugas/{nim_target}")
+def hapus_tugas(nim_target: int):
+    conn    = sqlite3.connect("pplk_tugas.db")
+    cursor  = conn.cursor()
+
+    # Menghapus satu baris peserta yang nim nya cocok dengan target
+    cursor.execute("DELETE FROM maba WHERE nim = ?", (nim_target,))
+
+    # 
+    conn.commit() # Sama ini juga harus dicommit biar data yang dihapus barusan bener bener ngga ada lagi dari database
+    conn.close()
+
+    return {"status": "Sukses", "Pesan": f"Data maba dengan NIM {nim_target} berhasil dihapus!"}
+
+# =========================================================================
+# 7. Menu Edit / Update Data Tugas Peserta
+# =========================================================================
+@app.put("/edit-tugas")
+def edit_tugas(nim_kamu: int, nama_baru: str, kelompok_baru: int, ling_tugas_baru: str):
+    conn    = sqlite3.connect(pplk_tugas.db)
+    cursor  = conn.cursor()
+
+    # Perintah update, mengubah isi kolom nama, nim kelompok dan link berdasarkan nim peserta
+    cursor.execute("""
+        UPDATE maba
+        SET nama    = ?, kelompok = ?, link_tugas = ?
+        WHERE nim   = ?
+    """, (nama_baru, kelompok_baru, link_tugas_baru, nim_kamu))
+
+    conn.commit() # Di save biar hasil editnya tersimpan permanen dan tidak corrupt
+    conn.close()
+
+    return {"status": "Sukses", "pesan": f"Data maba dengan NIm {nim_kamu} berhasil diperbarui!"}
+                   
